@@ -73,7 +73,7 @@ pub async fn get_permissions(
         let colleagues = Arc::clone(&colleagues);
         let rights = Arc::clone(&rights);
 
-        let handle = tokio::spawn(async move {
+        let handle = tokio::task::spawn_blocking(move || {
             let colleagues_message = colleagues
                 .iter()
                 .filter(|&c| c.client_alias_id != token_client_alias_id)
