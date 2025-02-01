@@ -76,10 +76,11 @@ impl IamService {
         &self,
         acl_message: &AclMessage,
         colleagues_message: &[ColleagueEntity],
-        clients_rights: &HashMap<i32, HashMap<String, AccessRightEntity>>,
+        rights: &HashMap<i32, HashMap<String, AccessRightEntity>>,
     ) -> bool {
         for &colleague in colleagues_message {
-            let rights = clients_rights.get(&colleague.client_alias_id).unwrap();
+            let empty = &HashMap::new();
+            let rights = rights.get(&colleague.client_alias_id).unwrap_or(empty);
 
             let access = self.get_access(&rights, &acl_message.permission);
             let colleague_allowed =
