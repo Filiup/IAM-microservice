@@ -70,12 +70,12 @@ impl IamService {
         right
     }
 
-    pub async fn is_group_allowed(
+    pub fn is_group_allowed(
         &self,
         acl_message: &AclMessage,
-        group_access_rights: &[HashMap<String, AccessRightEntity>],
+        group_access_rights: &HashMap<i32, HashMap<String, AccessRightEntity>>,
     ) -> bool {
-        group_access_rights.iter().any(|rights| {
+        group_access_rights.iter().any(|(_, rights)| {
             let access = self.get_access(rights, &acl_message.permission);
             Self::evaluate(&access, AclAction::ACCESS, AclOwnerShip::Feature)
         })
@@ -85,12 +85,10 @@ impl IamService {
         &self,
         acl_message: &AclMessage,
         colleagues_message: &[ColleagueEntity],
+        clients_rights: &HashMap<i32, HashMap<String, AccessRightEntity>>,
     ) -> Result<bool, sqlx::Error> {
         for &colleague in colleagues_message {
-            let rights = self
-                .driver
-                .load_access_rights(colleague.client_alias_id)
-                .await?;
+            let rights = clients_rights.get(&colleague.client_alias_id).unwrap();
 
             let access = self.get_access(&rights, &acl_message.permission);
             let colleague_allowed =

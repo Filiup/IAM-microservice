@@ -59,6 +59,7 @@ impl From<Option<i32>> for ColleageStatus {
 
 #[derive(Clone, Default, Serialize, Deserialize)]
 pub struct AccessRightEntity {
+    pub caid: Option<i32>,
     pub permission: Option<String>,
     pub feature: Option<i32>,
     pub owner: Option<i32>,

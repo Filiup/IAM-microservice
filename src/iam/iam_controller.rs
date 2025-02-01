@@ -1,4 +1,3 @@
-use super::iam_model::{AccessRightEntity, ColleagueEntity};
 use super::{iam_driver::IamDriver, iam_model::AclMessage};
 use super::{iam_model::AclRequest, iam_service::IamService};
 use crate::{common::security::jwt_guard::JwtGuard, tags::IamApiTags};
@@ -60,35 +59,6 @@ impl IamController {
     }
 }
 
-pub async fn get_group_access_rights(
-    colleagues: &[ColleagueEntity],
-    service: Arc<IamService>,
-) -> Result<Vec<HashMap<String, AccessRightEntity>>, sqlx::Error> {
-    let colleague_ids = colleagues
-        .iter()
-        .map(|colleague| colleague.client_alias_id)
-        .collect::<Vec<_>>();
-
-    let mut handles = Vec::new();
-    for colleague_alias_id in colleague_ids {
-        let service = Arc::clone(&service);
-        let handle =
-            tokio::spawn(
-                async move { service.driver.load_access_rights(colleague_alias_id).await },
-            );
-
-        handles.push(handle)
-    }
-
-    let mut result = Vec::new();
-    for handle in handles {
-        let colleague_rights = handle.await.unwrap()?;
-        result.push(colleague_rights)
-    }
-
-    Ok(result)
-}
-
 pub async fn get_permissions(
     service_clone: IamService,
     acl_messages: Vec<AclMessage>,
@@ -103,40 +73,45 @@ pub async fn get_permissions(
             .await?,
     );
 
+    let colleagues_ids = colleagues
+        .iter()
+        .map(|c| c.client_alias_id)
+        .collect::<Vec<_>>();
+
     let rights = Arc::new(
         service_clone
             .driver
-            .load_access_rights(token_client_alias_id)
+            .load_access_rights(&colleagues_ids)
             .await?,
     );
 
     let service = Arc::new(service_clone);
-    let group_access_rights =
-        Arc::new(get_group_access_rights(&colleagues, Arc::clone(&service)).await?);
 
     for mut acl_message in acl_messages {
         let service = Arc::clone(&service);
         let colleagues = Arc::clone(&colleagues);
         let rights = Arc::clone(&rights);
-        let group_access_rights = Arc::clone(&group_access_rights);
 
         let handle = tokio::spawn(async move {
             let colleagues_message = colleagues
                 .iter()
-                .filter(|&c| c.client_alias_id != token_client_alias_id) 
+                .filter(|&c| c.client_alias_id != token_client_alias_id)
                 .filter(|&c| acl_message.client_alias_ids.contains(&c.client_alias_id))
                 .copied()
                 .collect::<Vec<_>>();
 
-            let group_allowed = service
-                .is_group_allowed(&acl_message, &group_access_rights)
-                .await;
+            let group_allowed = service.is_group_allowed(&acl_message, rights.as_ref());
 
             let colleague_allowed = service
-                .are_colleagues_allowed(&acl_message, &colleagues_message)
+                .are_colleagues_allowed(&acl_message, &colleagues_message, &rights)
                 .await?;
 
-            let access_right_entity = service.get_access(rights.as_ref(), &acl_message.permission);
+            let empty = &HashMap::new();
+            let owner_rights = rights
+                .get(&token_client_alias_id)
+                .unwrap_or(empty);
+
+            let access_right_entity = service.get_access(owner_rights, &acl_message.permission);
             let allowed =
                 service.is_allowed(&acl_message, &access_right_entity, &colleagues_message);
 
