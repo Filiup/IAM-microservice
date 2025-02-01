@@ -1,0 +1,25 @@
+FROM rust:alpine3.19 AS builder
+RUN apk update && apk add --no-cache musl-dev protobuf-dev make
+
+RUN adduser -u 1000 -D rust
+USER rust
+
+ENV CARGO_HOME=/home/rust/.cargo
+ENV PATH=$CARGO_HOME/bin:$PATH
+ENV SQLX_OFFLINE=1
+
+WORKDIR /home/rust/app
+COPY --chown=rust:rust ./ . 
+
+RUN ls -la
+RUN cargo build --release
+
+FROM alpine:3.19
+
+RUN adduser -u 1000 -D rust
+USER rust
+
+WORKDIR /home/rust/app
+
+COPY --from=builder /home/rust/app/target/release/ms-iam .
+ENTRYPOINT ["./ms-iam"]

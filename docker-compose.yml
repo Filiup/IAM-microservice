@@ -1,0 +1,63 @@
+version: "3.4"
+services:
+  iam-redis:
+    container_name: iam-redis
+    image: redis:7-alpine
+    ports:
+      - 6370:${REDIS_PORT}
+    healthcheck:
+      test: redis-cli ping || exit 1
+      interval: 10s
+      timeout: 30s
+      start_period: 30s
+    env_file:
+      - .env
+  iam-pg:
+    container_name: iam-pg
+    image: postgres:17-bullseye
+    ports:
+      - 5430:${PG_PORT}
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: iam
+    env_file:
+      - .env
+    healthcheck:
+      test: pg_isready || exit 1
+      interval: 10s
+      timeout: 30s
+      start_period: 120s
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+  ms-iam-rust:
+    container_name: ms-iam-rust
+    build:
+      context: .
+    depends_on:
+      iam-pg:
+        condition: service_healthy
+      iam-redis:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    ports:
+      - ${MS_IAM_REST_PORT}:${MS_IAM_REST_PORT}
+    env_file:
+      - .env
+    environment:
+      DATABASE_URL: postgresql://${PG_USER}:${PG_PASSWORD}@${PG_HOST}:${PG_PORT}/${PG_DB}
+    volumes:
+      - .:/home/rust/ms-iam
+      - /home/$USER/.cargo/registry:/home/rust/.cargo/registry
+    working_dir: /home/rust/ms-iam
+    command:
+      - sh
+      - -c
+      - |
+        cargo watch -x run
+
+
+volumes:
+  pg_data:
