@@ -3,12 +3,15 @@
 # Script is using jwt.sh project to create JWT
 # URL: https://github.com/gasconleon/jwt.sh
 
+# Set this variables according to "groups_clients" table
+CLIENT_ALIAS_ID=1
+GROUP_ID=1
+
 JWT_SH_URL="https://raw.githubusercontent.com/gasconleon/jwt.sh/refs/heads/master/jwt.sh"
 
 PRIVATE_KEY_FILE="jwtRS256.key"
 ALGORITHM="RS256"
-CLIENT_ALIAS_ID=1
-GROUP_ID=1
+
 ISSUER=test
 
 CURRENT_TIMESTAMP=$(date +%s)
