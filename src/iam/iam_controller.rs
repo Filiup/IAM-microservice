@@ -25,18 +25,10 @@ enum Response<T: ParseFromJSON + ToJSON + Send + Sync> {
     SqlError(Json<ApiError>),
 }
 
-pub struct IamController {
-    service: IamService,
-}
+pub struct IamController;
 
 #[OpenApi(prefix_path = "rights", tag = "IamApiTags::Acl")]
 impl IamController {
-    pub async fn new() -> Self {
-        Self {
-            service: IamService,
-        }
-    }
-
     #[oai(path = "/", method = "post")]
     async fn get_access_rights(
         &self,
@@ -44,7 +36,7 @@ impl IamController {
         guard: JwtGuard,
     ) -> Response<AclRequest> {
         let user = guard.get_user();
-        let response = get_permissions(self.service, request.0.rights, user.caid).await;
+        let response = get_permissions(request.0.rights, user.caid).await;
 
         match response {
             Ok(acl_messages) => Response::Ok(Json(AclRequest {
@@ -60,7 +52,6 @@ impl IamController {
 }
 
 pub async fn get_permissions(
-    service_clone: IamService,
     acl_messages: Vec<AclMessage>,
     token_client_alias_id: i32,
 ) -> Result<Vec<AclMessage>, sqlx::Error> {
@@ -68,27 +59,17 @@ pub async fn get_permissions(
 
     let driver = IamDriver::new().await;
 
-    let colleagues = Arc::new(
-            driver
-            .load_colleagues(token_client_alias_id)
-            .await?,
-    );
+    let colleagues = Arc::new(driver.load_colleagues(token_client_alias_id).await?);
 
     let colleagues_ids = colleagues
         .iter()
         .map(|c| c.client_alias_id)
         .collect::<Vec<_>>();
 
-    let rights = Arc::new(
-            driver
-            .load_access_rights(&colleagues_ids)
-            .await?,
-    );
-
-    let service = Arc::new(service_clone);
+    let rights = Arc::new(driver.load_access_rights(&colleagues_ids).await?);
 
     for mut acl_message in acl_messages {
-        let service = Arc::clone(&service);
+        let service = IamService;
         let colleagues = Arc::clone(&colleagues);
         let rights = Arc::clone(&rights);
 

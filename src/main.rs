@@ -16,7 +16,7 @@ async fn main() -> Result<(), std::io::Error> {
     }
     tracing_subscriber::fmt::init();
 
-    let api_service = OpenApiService::new(IamController::new().await, "ms-iam", "1.0")
+    let api_service = OpenApiService::new(IamController, "ms-iam", "1.0")
         .server("http://localhost:3000/ms-iam");
     let ui = api_service.swagger_ui();
     let server_key = get_env_variable("JWT_ACCESS_PUBLIC_KEY");
