@@ -49,7 +49,7 @@ impl IamDriver {
             FROM groups_clients gc
             JOIN groups_clients gc2
                 ON gc.group_id = gc2.group_id
-            WHERE gc2.client_alias_id = $1;
+            WHERE gc2.client_alias_id = $1 AND gc.client_alias_id != $1;
         "#,
             client_alias_id
         )

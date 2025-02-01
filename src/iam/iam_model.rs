@@ -1,3 +1,5 @@
+use core::panic;
+
 use poem_openapi::Enum;
 use poem_openapi::Object;
 use serde::Deserialize;
@@ -36,27 +38,6 @@ pub enum AclOwnerShip {
     Deleted,
 }
 
-#[derive(Clone, Copy, Deserialize, Serialize, Default)]
-pub enum ColleageStatus {
-    Deleted,
-    Suspended,
-    Colleague,
-
-    #[default]
-    None,
-}
-
-impl From<Option<i32>> for ColleageStatus {
-    fn from(value: Option<i32>) -> Self {
-        match value {
-            Some(0) => Self::Deleted,
-            Some(1) => Self::Suspended,
-            Some(2) => Self::Colleague,
-            _ => Self::None,
-        }
-    }
-}
-
 #[derive(Clone, Default, Serialize, Deserialize)]
 pub struct AccessRightEntity {
     pub caid: Option<i32>,
@@ -73,7 +54,25 @@ pub struct ColleagueEntity {
     pub client_alias_id: i32,
     pub client_id: Option<i32>,
     pub group_id: i32,
-    pub status: ColleageStatus,
+    pub status: ColleagueStatus,
+}
+
+#[derive(Clone, Copy, Deserialize, Serialize)]
+pub enum ColleagueStatus {
+    Deleted,
+    Suspended,
+    Colleague,
+}
+
+impl From<Option<i32>> for ColleagueStatus {
+    fn from(value: Option<i32>) -> Self {
+        match value {
+            Some(0) => Self::Deleted,
+            Some(1) => Self::Suspended,
+            Some(2) => Self::Colleague,
+            _ => panic!(),
+        }
+    }
 }
 
 impl AccessRightEntity {

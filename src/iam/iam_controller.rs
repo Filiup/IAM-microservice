@@ -6,7 +6,6 @@ use poem_openapi::{
     types::{ParseFromJSON, ToJSON},
     ApiResponse, Object, OpenApi,
 };
-use std::collections::HashMap;
 use std::sync::Arc;
 
 #[derive(Object)]
@@ -59,9 +58,8 @@ pub async fn get_permissions(
 
     let driver = IamDriver::new().await;
 
-    let colleagues = Arc::new(driver.load_colleagues(token_client_alias_id).await?);
-
-    let colleagues_ids = colleagues
+    let all_colleagues = Arc::new(driver.load_colleagues(token_client_alias_id).await?);
+    let colleagues_ids = all_colleagues
         .iter()
         .map(|c| c.client_alias_id)
         .collect::<Vec<_>>();
@@ -69,29 +67,26 @@ pub async fn get_permissions(
     let rights = Arc::new(driver.load_access_rights(&colleagues_ids).await?);
 
     for mut acl_message in acl_messages {
-        let service = IamService;
-        let colleagues = Arc::clone(&colleagues);
+        let colleagues = Arc::clone(&all_colleagues);
         let rights = Arc::clone(&rights);
 
         let handle = tokio::task::spawn_blocking(move || {
             let colleagues_message = colleagues
                 .iter()
-                .filter(|&c| c.client_alias_id != token_client_alias_id)
                 .filter(|&c| acl_message.client_alias_ids.contains(&c.client_alias_id))
                 .copied()
                 .collect::<Vec<_>>();
 
-            let group_allowed = service.is_group_allowed(&acl_message, rights.as_ref());
+            let service = IamService {
+                token_alias_id: token_client_alias_id,
+                colleagues: colleagues_message,
+                message: &acl_message,
+                rights,
+            };
 
-            let colleague_allowed =
-                service.are_colleagues_allowed(&acl_message, &colleagues_message, &rights);
-
-            let empty = &HashMap::new();
-            let owner_rights = rights.get(&token_client_alias_id).unwrap_or(empty);
-
-            let access_right_entity = service.get_access(owner_rights, &acl_message.permission);
-            let allowed =
-                service.is_allowed(&acl_message, &access_right_entity, &colleagues_message);
+            let group_allowed = service.is_group_allowed();
+            let colleague_allowed = service.are_colleagues_allowed();
+            let allowed = service.is_allowed();
 
             acl_message.allowed = Some(group_allowed && colleague_allowed && allowed);
             Ok(acl_message)
