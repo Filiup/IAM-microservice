@@ -1,22 +1,13 @@
 use std::collections::HashMap;
 
-use super::{
-    iam_driver::IamDriver,
-    iam_model::{
-        AccessRightEntity, AclAction, AclMessage, AclOwnerShip, ColleageStatus, ColleagueEntity,
-    },
+use super::iam_model::{
+    AccessRightEntity, AclAction, AclMessage, AclOwnerShip, ColleageStatus, ColleagueEntity,
 };
 
-#[derive(Clone)]
-pub struct IamService {
-    pub driver: IamDriver,
-}
+#[derive(Clone, Copy)]
+pub struct IamService;
 
 impl IamService {
-    pub fn new(driver: IamDriver) -> Self {
-        Self { driver }
-    }
-
     fn evaluate(
         access_right_entity: &AccessRightEntity,
         operation: AclAction,

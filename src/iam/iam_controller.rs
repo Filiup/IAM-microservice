@@ -33,7 +33,7 @@ pub struct IamController {
 impl IamController {
     pub async fn new() -> Self {
         Self {
-            service: IamService::new(IamDriver::new().await),
+            service: IamService,
         }
     }
 
@@ -44,7 +44,7 @@ impl IamController {
         guard: JwtGuard,
     ) -> Response<AclRequest> {
         let user = guard.get_user();
-        let response = get_permissions(self.service.clone(), request.0.rights, user.caid).await;
+        let response = get_permissions(self.service, request.0.rights, user.caid).await;
 
         match response {
             Ok(acl_messages) => Response::Ok(Json(AclRequest {
@@ -66,9 +66,10 @@ pub async fn get_permissions(
 ) -> Result<Vec<AclMessage>, sqlx::Error> {
     let mut handles = Vec::new();
 
+    let driver = IamDriver::new().await;
+
     let colleagues = Arc::new(
-        service_clone
-            .driver
+            driver
             .load_colleagues(token_client_alias_id)
             .await?,
     );
@@ -79,8 +80,7 @@ pub async fn get_permissions(
         .collect::<Vec<_>>();
 
     let rights = Arc::new(
-        service_clone
-            .driver
+            driver
             .load_access_rights(&colleagues_ids)
             .await?,
     );
