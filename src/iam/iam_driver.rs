@@ -68,7 +68,7 @@ impl IamDriver {
         &self,
         group_id: i32,
     ) -> Result<HashMap<i32, HashMap<String, AccessRightEntity>>, sqlx::Error> {
-        /*         let access_rights_redis_key = format!("IAM_AR_{}", client_alias_ids);
+        let access_rights_redis_key = format!("IAM_AR_{}", group_id);
         let cached_access_rights = self
             .cashing_service
             .get::<Vec<AccessRightEntity>>("off") // TODO: Replace with access_rights_redis_key
@@ -82,7 +82,7 @@ impl IamDriver {
                 return Ok(create_access_right_map(cached_access_rights))
             }
             _ => (),
-        } */
+        }
 
         let pool = Database::pg().await;
         let access_right_entities = sqlx::query_as!(
@@ -179,10 +179,10 @@ impl IamDriver {
         .fetch_all(&pool)
         .await?;
 
-        /*         let _ = self
-        .cashing_service
-        .set(access_rights_redis_key, &access_right_entities)
-        .await; */
+        let _ = self
+            .cashing_service
+            .set(access_rights_redis_key, &access_right_entities)
+            .await;
         Ok(create_access_right_map(access_right_entities))
     }
 }
