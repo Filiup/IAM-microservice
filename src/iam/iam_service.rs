@@ -81,12 +81,12 @@ impl IamService {
         })
     }
 
-    pub async fn are_colleagues_allowed(
+    pub fn are_colleagues_allowed(
         &self,
         acl_message: &AclMessage,
         colleagues_message: &[ColleagueEntity],
         clients_rights: &HashMap<i32, HashMap<String, AccessRightEntity>>,
-    ) -> Result<bool, sqlx::Error> {
+    ) -> bool {
         for &colleague in colleagues_message {
             let rights = clients_rights.get(&colleague.client_alias_id).unwrap();
 
@@ -94,11 +94,11 @@ impl IamService {
             let colleague_allowed =
                 Self::evaluate(&access, AclAction::ACCESS, AclOwnerShip::Feature);
             if !colleague_allowed {
-                return Ok(false);
+                return false;
             }
         }
 
-        Ok(true)
+        true
     }
 
     pub fn is_allowed(

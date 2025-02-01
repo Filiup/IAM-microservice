@@ -102,14 +102,11 @@ pub async fn get_permissions(
 
             let group_allowed = service.is_group_allowed(&acl_message, rights.as_ref());
 
-            let colleague_allowed = service
-                .are_colleagues_allowed(&acl_message, &colleagues_message, &rights)
-                .await?;
+            let colleague_allowed =
+                service.are_colleagues_allowed(&acl_message, &colleagues_message, &rights);
 
             let empty = &HashMap::new();
-            let owner_rights = rights
-                .get(&token_client_alias_id)
-                .unwrap_or(empty);
+            let owner_rights = rights.get(&token_client_alias_id).unwrap_or(empty);
 
             let access_right_entity = service.get_access(owner_rights, &acl_message.permission);
             let allowed =
