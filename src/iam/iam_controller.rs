@@ -35,7 +35,7 @@ impl IamController {
         guard: JwtGuard,
     ) -> Response<AclRequest> {
         let user = guard.get_user();
-        let response = get_permissions(request.0.rights, user.caid).await;
+        let response = get_permissions(request.0.rights, user.caid, user.gid).await;
 
         match response {
             Ok(acl_messages) => Response::Ok(Json(AclRequest {
@@ -53,18 +53,14 @@ impl IamController {
 pub async fn get_permissions(
     acl_messages: Vec<AclMessage>,
     token_client_alias_id: i32,
+    group_id: i32,
 ) -> Result<Vec<AclMessage>, sqlx::Error> {
     let mut handles = Vec::new();
 
     let driver = IamDriver::new().await;
 
     let all_colleagues = Arc::new(driver.load_colleagues(token_client_alias_id).await?);
-    let colleagues_ids = all_colleagues
-        .iter()
-        .map(|c| c.client_alias_id)
-        .collect::<Vec<_>>();
-
-    let rights = Arc::new(driver.load_access_rights(&colleagues_ids).await?);
+    let rights = Arc::new(driver.load_access_rights(group_id).await?);
 
     for mut acl_message in acl_messages {
         let colleagues = Arc::clone(&all_colleagues);

@@ -66,7 +66,7 @@ impl IamDriver {
 
     pub async fn load_access_rights(
         &self,
-        client_alias_ids: &[i32],
+        group_id: i32,
     ) -> Result<HashMap<i32, HashMap<String, AccessRightEntity>>, sqlx::Error> {
         /*         let access_rights_redis_key = format!("IAM_AR_{}", client_alias_ids);
         let cached_access_rights = self
@@ -91,7 +91,7 @@ impl IamDriver {
          WITH active_alias_ids AS (
                 SELECT client_alias_id AS caid
                 FROM groups_clients
-                WHERE client_alias_id = ANY($1)
+                WHERE group_id = $1
             ),
             running_subscriptions AS (
                 SELECT spl.subs_plan_name, gc.client_alias_id AS caid
@@ -174,7 +174,7 @@ impl IamDriver {
             GROUP BY PERMISSION, caid;
        
             "#,
-            client_alias_ids
+            group_id
         )
         .fetch_all(&pool)
         .await?;

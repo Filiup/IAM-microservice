@@ -6,7 +6,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
-    pub caid: i32
+    pub caid: i32,
+    pub gid: i32,
 }
 
 /// ApiKey authorization
