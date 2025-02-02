@@ -23,7 +23,7 @@ impl IamDriver {
         let colleagues_redis_key = format!("IAM_COLLEAGUES_{}", client_alias_id);
         let cached_colleagues = self
             .cashing_service
-            .get::<Vec<ColleagueEntity>>("off") // TODO: Replace with colleagues_redis_key
+            .get::<Vec<ColleagueEntity>>(&colleagues_redis_key)
             .await;
 
         match cached_colleagues {
@@ -71,7 +71,7 @@ impl IamDriver {
         let access_rights_redis_key = format!("IAM_AR_{}", group_id);
         let cached_access_rights = self
             .cashing_service
-            .get::<Vec<AccessRightEntity>>("off") // TODO: Replace with access_rights_redis_key
+            .get::<Vec<AccessRightEntity>>(&access_rights_redis_key) 
             .await;
 
         match cached_access_rights {
