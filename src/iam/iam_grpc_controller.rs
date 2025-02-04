@@ -57,6 +57,8 @@ impl IamService for IamGrpcController {
         &self,
         request: Request<AclRequestRpc>,
     ) -> Result<Response<AclResponseRpc>, Status> {
+        println!("HERE");
+
         let jwt_public_key = ""; // TODO
 
         let authorization_header = request.metadata().get("authorization").ok_or(
