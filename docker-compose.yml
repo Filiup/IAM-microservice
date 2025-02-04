@@ -45,6 +45,7 @@ services:
     tty: true
     ports:
       - ${MS_IAM_REST_PORT}:${MS_IAM_REST_PORT}
+      - ${MS_IAM_GRPC_PORT}:${MS_IAM_GRPC_PORT}
     env_file:
       - .env
     environment:
