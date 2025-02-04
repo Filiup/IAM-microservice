@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package iam;
+
+service IamService {
+  rpc getAccessRights(AclRequestRpc) returns (AclResponseRpc) {};
+}
+
+enum AclActionRpc {
+    READ = 0;
+    EDIT = 1;
+    DELETE = 2;
+    ACCESS = 3;
+}
+
+message AclRequestRpc {
+  repeated AclRequestRpc rights = 1;
+}
+
+message AclResponseRpc {
+  repeated AclMessageRpc rights = 1;
+}
+
+message AclMessageRpc {
+  AclActionRpc operation = 1;
+  string permission = 2;
+  repeated uint32 clientAliasIds = 3;
+  optional bool allowed = 4;
+}
+
