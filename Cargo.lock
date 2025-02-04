@@ -1297,6 +1297,7 @@ dependencies = [
  "poem-grpc",
  "poem-grpc-build",
  "poem-openapi",
+ "prost",
  "redis",
  "rmp-serde",
  "serde",

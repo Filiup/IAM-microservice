@@ -24,6 +24,7 @@ redis = { version = "0.24.0", features = ["tokio-comp"] }
 tracing = "0.1.40"
 rmp-serde = "1.1.2"
 anyhow = "1.0.79"
+prost = "0.13.4"
 
 
 [build-dependencies]
