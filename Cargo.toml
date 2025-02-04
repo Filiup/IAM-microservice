@@ -15,7 +15,7 @@ serde_json = "1.0.108"
 jsonwebtoken = "9.2.0"
 poem = "3.1.6"
 poem-openapi = { version= "5.1.5", features = ["swagger-ui"] }
-poem-grpc = "0.2.25"
+poem-grpc = "0.5.3"
 tracing-subscriber = "0.3.18"
 jwt = "0.16.0"
 base64 = "0.21.5"
@@ -24,3 +24,7 @@ redis = { version = "0.24.0", features = ["tokio-comp"] }
 tracing = "0.1.40"
 rmp-serde = "1.1.2"
 anyhow = "1.0.79"
+
+
+[build-dependencies]
+poem-grpc-build = "0.5.2"
