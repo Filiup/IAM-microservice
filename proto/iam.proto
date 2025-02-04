@@ -24,7 +24,7 @@ message AclResponseRpc {
 message AclMessageRpc {
   AclActionRpc operation = 1;
   string permission = 2;
-  repeated uint32 clientAliasIds = 3;
+  repeated int32 clientAliasIds = 3;
   optional bool allowed = 4;
 }
 
