@@ -20,7 +20,7 @@ async fn main() -> Result<(), std::io::Error> {
 
     let rest_port = get_env_variable("MS_IAM_REST_PORT");
     let grpc_port = get_env_variable("MS_IAM_GRPC_PORT");
-    let server_key = get_env_variable("JWT_ACCESS_PUBLIC_KEY");
+    let public_key_base64 = get_env_variable("JWT_ACCESS_PUBLIC_KEY");
 
     let api_service = OpenApiService::new(IamController, "ms-iam", "1.0")
         .server(format!("http://localhost:{}/ms-iam", rest_port));
@@ -29,12 +29,12 @@ async fn main() -> Result<(), std::io::Error> {
     let routes_rest = Route::new()
         .nest("/ms-iam", api_service)
         .nest("/ms-iam/docs", ui)
-        .data(server_key.clone());
+        .data(public_key_base64.clone());
 
     let routes_rpc = RouteGrpc::new()
         .add_service(IamServiceServer::new(IamGrpcController))
         .with(Tracing)
-        .data(server_key.clone());
+        .data(public_key_base64.clone());
 
     let server_rest = poem::Server::new(TcpListener::bind(format!("0.0.0.0:{}", rest_port)))
         .run_with_graceful_shutdown(routes_rest, sigint(), None);

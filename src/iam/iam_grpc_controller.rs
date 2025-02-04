@@ -57,16 +57,15 @@ impl IamService for IamGrpcController {
         &self,
         request: Request<AclRequestRpc>,
     ) -> Result<Response<AclResponseRpc>, Status> {
-        println!("HERE");
-
-        let jwt_public_key = ""; // TODO
+        let public_key_base64 = request.data::<String>().unwrap();
+        let public_key = jwt_decoder::decode_key(public_key_base64).unwrap();
 
         let authorization_header = request.metadata().get("authorization").ok_or(
             Status::new(Code::Unauthenticated)
                 .with_message("You must provide authorization header with JWT token."),
         )?;
 
-        let user = jwt_decoder::decode_jwt(authorization_header, jwt_public_key).ok_or(
+        let user = jwt_decoder::decode_jwt(authorization_header, &public_key).ok_or(
             Status::new(Code::Unauthenticated).with_message("Failed to decode provided JWT."),
         )?;
 

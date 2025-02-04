@@ -1,9 +1,8 @@
-use base64::{engine::general_purpose, Engine};
 use poem::Request;
 use poem_openapi::{auth::ApiKey, SecurityScheme};
 use serde::{Deserialize, Serialize};
 
-use super::jwt_decoder::decode_jwt;
+use super::jwt_decoder::{decode_jwt, decode_key};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct User {
@@ -29,9 +28,8 @@ impl JwtGuard {
 }
 
 pub async fn validate_token(req: &Request, authorization: ApiKey) -> Option<User> {
-    let server_key = req.data::<String>().unwrap();
-    let decoded_key = general_purpose::STANDARD.decode(server_key).ok()?;
-    let decoded_key = String::from_utf8(decoded_key).ok()?;
+    let public_key_base64 = req.data::<String>().unwrap();
+    let decoded_key = decode_key(&public_key_base64)?;
 
     decode_jwt(&authorization.key, &decoded_key)
 }
