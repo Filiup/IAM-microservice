@@ -1,3 +1,4 @@
+pub mod controller_common;
 pub mod iam_grpc_controller;
 pub mod iam_controller;
 pub mod iam_model;
