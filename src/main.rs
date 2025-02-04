@@ -16,8 +16,10 @@ async fn main() -> Result<(), std::io::Error> {
     }
     tracing_subscriber::fmt::init();
 
+    let port = get_env_variable("MS_IAM_REST_PORT");
+
     let api_service = OpenApiService::new(IamController, "ms-iam", "1.0")
-        .server("http://localhost:3000/ms-iam");
+        .server(format!("http://localhost:{}/ms-iam", port));
     let ui = api_service.swagger_ui();
     let server_key = get_env_variable("JWT_ACCESS_PUBLIC_KEY");
 
@@ -25,12 +27,9 @@ async fn main() -> Result<(), std::io::Error> {
         .nest("/ms-iam", api_service)
         .nest("/ms-iam/docs", ui)
         .data(server_key);
-    poem::Server::new(TcpListener::bind(format!(
-        "0.0.0.0:{}",
-        get_env_variable("MS_IAM_REST_PORT")
-    )))
-    .run_with_graceful_shutdown(app, sigint(), None)
-    .await
+    poem::Server::new(TcpListener::bind(format!("0.0.0.0:{}", port)))
+        .run_with_graceful_shutdown(app, sigint(), None)
+        .await
 }
 
 async fn sigint() {
