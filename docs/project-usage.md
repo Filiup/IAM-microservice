@@ -85,7 +85,7 @@ This project includes **OpenAPI** support, which is **automatically generated** 
 
 
 
-# Calling the Micro-service via GRPc
+# Calling the Micro-service via gRPC
 
 - TODO ( Add Grpc usage docs )
 
