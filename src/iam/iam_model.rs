@@ -10,6 +10,11 @@ pub struct AclRequest {
     pub rights: Vec<AclMessage>,
 }
 
+#[derive(Object)]
+pub struct AclResponse {
+    pub rights: Vec<AclMessage>,
+}
+
 #[derive(Debug, Object, Clone, Eq, PartialEq)]
 pub struct AclMessage {
     pub operation: AclAction,

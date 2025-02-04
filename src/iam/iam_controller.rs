@@ -1,3 +1,4 @@
+use super::iam_model::AclResponse;
 use super::{iam_driver::IamDriver, iam_model::AclMessage};
 use super::{iam_model::AclRequest, iam_service::IamService};
 use crate::{common::security::jwt_guard::JwtGuard, tags::IamApiTags};
@@ -33,12 +34,12 @@ impl IamController {
         &self,
         request: Json<AclRequest>,
         guard: JwtGuard,
-    ) -> Response<AclRequest> {
+    ) -> Response<AclResponse> {
         let user = guard.get_user();
         let response = get_permissions(request.0.rights, user.caid, user.gid).await;
 
         match response {
-            Ok(acl_messages) => Response::Ok(Json(AclRequest {
+            Ok(acl_messages) => Response::Ok(Json(AclResponse {
                 rights: acl_messages,
             })),
             Err(err) => Response::SqlError(Json(ApiError {
