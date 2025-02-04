@@ -14,7 +14,7 @@ enum AclActionRpc {
 }
 
 message AclRequestRpc {
-  repeated AclRequestRpc rights = 1;
+  repeated AclMessageRpc rights = 1;
 }
 
 message AclResponseRpc {
