@@ -87,7 +87,6 @@ This project includes **OpenAPI** support, which is **automatically generated** 
 
 # Calling the Micro-service via gRPC
 
-- TODO ( Add Grpc usage docs )
+The **Protobuf** definition file is located in [proto/iam.proto](../proto/iam.proto) file. It defines a single service with the `getAccessRights` method. This method is functionally equivalent to the `POST /ms-iam/rights` endpoint, accepting the same request body and requiring a **JWT token** in the request headers.
 
-
-
+To test the **gRPC** implementation, you can use [Postman](https://blog.postman.com/postman-now-supports-grpc/), which supports **protocol buffers** and can automatically generate example **Protobuf** messages.

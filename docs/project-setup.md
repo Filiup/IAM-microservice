@@ -25,9 +25,7 @@ To start the project in development mode:
 
    - **Redis** – accessible on port `6370`
    - **PostgreSQL** – accessible on port `5430`
-   - **IAM microservice** – accessible on port `9101`
-
-
+   - **IAM microservice** – exposes a gRPC service on port `9501` and a REST API on port `9101`
 
 ## Running project inside of production mode
 
