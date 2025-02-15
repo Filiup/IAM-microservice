@@ -4,8 +4,8 @@ This script is used to generate and sign a **JWT token**, which can then be used
 
 ### Usage
 
-- To sign a JWT token, update the `CLIENT_ALIAS_ID` and  `GROUP_ID` variables.
-  - These variables are embedded in the **JWT payload** and specify the user for whom the request is being made.
+- To sign a JWT token, choose some user from [public.groups_clients](./database-structure.md) table and specify its `client_alias_id` and `group_id`
+  - Input will be embedded in the **JWT payload** and specify the user for whom the request is being made.
 
 
 
